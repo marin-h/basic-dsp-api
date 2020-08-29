@@ -93,3 +93,15 @@ func (dsp *DSP) frequencyCapped(userId string, now time.Time) bool {
 func (dsp *DSP) registerBid(bid Bid) {
 	dsp.Bids[bid.Id] = bid
 }
+
+func (dsp *DSP) registerImpression(bid Bid) {
+
+	newImpression := Impression{bid.Timestamp, &Impression{}}
+
+	if _, ok := dsp.Registry[bid.UserId]; !ok {
+		dsp.Registry[bid.UserId] = ImpressionRegistry{}
+	}
+
+	registry := dsp.Registry[bid.UserId]
+	registry.Append(&newImpression)
+}
