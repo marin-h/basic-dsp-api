@@ -12,16 +12,16 @@ func main() {
 	http.HandleFunc("/bid", func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method == http.MethodPost {
-			auction := AuctionRequest{}
+			auction := AuctionData{}
 			if err := json.NewDecoder(r.Body).Decode(&auction); err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			fmt.Println(auction)
+			fmt.Printf("%+v\n", auction)
 			w.WriteHeader(http.StatusOK)
 			return
 		}
-		w.WriteHeader(http.StatusBadRequest)
+		w.WriteHeader(http.StatusNotImplemented)
 		return
 	})
 	log.Println("Listening in port 8080")
@@ -29,21 +29,21 @@ func main() {
 }
 
 // JSON Structs
-type AuctionRequest struct {
-	id     string
-	imp    Bidfloor
-	device Device
-	user   User
+type AuctionData struct {
+	Id     string       `json:"id"`
+	Imp    BidfloorData `json:"imp"`
+	Device DeviceData   `json:"device"`
+	User   UserData     `json:"user"`
 }
 
-type Device struct {
-	ip string
+type DeviceData struct {
+	Ip string `json:"ip"`
 }
 
-type Bidfloor struct {
-	bidfloor float64
+type BidfloorData struct {
+	Bidfloor float64 `json:"bidfloor"`
 }
 
-type User struct {
-	id string
+type UserData struct {
+	Id string `json:"id"`
 }
