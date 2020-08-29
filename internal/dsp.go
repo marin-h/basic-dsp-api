@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"math/rand"
+	"time"
 )
 
 type DSP struct {
@@ -35,6 +36,14 @@ func (dsp *DSP) getBid(userId string, bidFloor float64) (error, *Bid) {
 		return errors.New("Out of budget"), bid
 	}
 
+	now := time.Now()
+	if dsp.frequencyCapped(userId, now) {
+		return errors.New("User frequency is capped"), bid
+	}
+
+	timestamp := now.Unix()
+	bid = createBid(getBidId(), userId, price, timestamp)
+
 	return nil, bid
 }
 
@@ -42,4 +51,8 @@ func (dsp *DSP) setup(dailyBudget float64, limitPerMinute int8, limitPer3Minute 
 	dsp.Budget = dailyBudget
 	dsp.MaxImpressionsPer3Minutes = limitPer3Minute
 	dsp.MaxImpressionsPerMinute = limitPerMinute
+}
+
+func (dsp *DSP) frequencyCapped(userId string, now time.Time) bool {
+	return true
 }
