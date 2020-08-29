@@ -54,5 +54,31 @@ func (dsp *DSP) setup(dailyBudget float64, limitPerMinute int8, limitPer3Minute 
 }
 
 func (dsp *DSP) frequencyCapped(userId string, now time.Time) bool {
-	return true
+
+	var count1MinuteImpressions int8
+	var count3MinutesImpressions int8
+
+	timeStampAMinuteAgo := now.Add(-1 * time.Minute).Unix()
+	timeStamp3MinuteAgo := now.Add(-3 * time.Minute).Unix()
+
+	currentImpression := dsp.Registry[userId].end
+
+	for currentImpression.timestamp >= timeStamp3MinuteAgo {
+
+		if currentImpression.timestamp >= timeStamp3MinuteAgo {
+			count3MinutesImpressions += 1
+			if count3MinutesImpressions == dsp.MaxImpressionsPer3Minutes {
+				return true
+			}
+
+			if currentImpression.timestamp >= timeStampAMinuteAgo {
+				count1MinuteImpressions += 1
+				if count1MinuteImpressions == dsp.MaxImpressionsPerMinute {
+					return true
+				}
+			}
+		}
+		currentImpression = currentImpression.previous
+	}
+	return false
 }
