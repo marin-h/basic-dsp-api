@@ -17,6 +17,7 @@ func main() {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
+			fmt.Println("Bid posted")
 			fmt.Printf("%+v\n", auction)
 			w.WriteHeader(http.StatusOK)
 			return
