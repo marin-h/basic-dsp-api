@@ -9,6 +9,9 @@ import (
 
 func main() {
 
+	fs := http.FileServer(http.Dir("./doc"))
+	http.Handle("/doc/", http.StripPrefix("/doc/", fs))
+
 	http.HandleFunc("/bid", func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method == http.MethodPost {
