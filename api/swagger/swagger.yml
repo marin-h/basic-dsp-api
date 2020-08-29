@@ -1,7 +1,7 @@
 swagger: "2.0"
 info:
   title: simple-dsp API
-  description: auction & bid handlers.
+  description: Bid handlers for simple-dsp
   version: 1.0.0
 host: localhost:8080
 basePath: /
@@ -16,7 +16,7 @@ paths:
   /bid:
     post:
       summary: Create bid
-      operationId: getBid
+      description: Create a pending bid for a user's auction
       parameters:
         - in: body
           description: The bid to create.
@@ -28,6 +28,20 @@ paths:
           description: Bid created
         '204':
           description: Bid not created
+    put:
+      summary: Update Bid 
+      description: Register user's impression and decrease budget spent
+      parameters:
+        - in: body
+          description: The bid to create.
+          name: payload
+          schema: 
+            "$ref": "#/definitions/putPayload"
+      responses:
+        '412':
+          description: Budget limit
+        '404':
+          description: Bid not found
 
 definitions:
   postPayload:
@@ -62,3 +76,11 @@ definitions:
           id:
             type: string
             example: "f345nf0k"
+  putPayload:
+    type: object
+    required: 
+      - bidid
+    properties:
+      bidid:
+        type: string
+        example: "6db52328-ff16-4485-b67c-2bf0dde36085"
