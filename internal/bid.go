@@ -5,11 +5,11 @@ import (
 )
 
 type Bid struct {
-	Id        string `json:"-"`
-	UserId    string `json:"-"`
-	Timestamp int64  `json:"-"`
-	Price     float64
-	Nurl      string
+	Id        string  `json:"-"`
+	UserId    string  `json:"-"`
+	Timestamp int64   `json:"-"`
+	Price     float64 `json:"price"`
+	Nurl      string  `json:"nurl"`
 }
 
 func createBid(id string, userId string, price float64, timestamp int64) *Bid {
