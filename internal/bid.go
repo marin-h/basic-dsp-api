@@ -1,9 +1,9 @@
 package main
 
 type Bid struct {
-	id        string `json:"-"`
-	userId    string `json:"-"`
-	timestamp int64  `json:"-"`
-	price     float64
-	nurl      string
+	Id        string `json:"-"`
+	UserId    string `json:"-"`
+	Timestamp int64  `json:"-"`
+	Price     float64
+	Nurl      string
 }

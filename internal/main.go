@@ -30,9 +30,9 @@ func main() {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			err, bid := dsp.getBid(auction.user.id, auction.imp.bidFloor)
-			if err != nil {
-				responseBody := AuctionResponse{auction.id, bid.id, *bid}
+			err, bid := dsp.getBid(auction.User.Id, auction.Imp.Bidfloor)
+			if err == nil {
+				responseBody := AuctionResponseData{auction.Id, bid.id, *bid}
 				json.NewEncoder(w).Encode(responseBody)
 				w.WriteHeader(http.StatusOK)
 				return
@@ -40,8 +40,6 @@ func main() {
 				http.Error(w, err.Error(), http.StatusNoContent)
 				return
 			}
-			w.WriteHeader(http.StatusOK)
-			return
 		}
 		w.WriteHeader(http.StatusNotImplemented)
 		return
