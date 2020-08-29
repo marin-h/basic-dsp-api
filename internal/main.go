@@ -35,7 +35,7 @@ func main() {
 			err, bid := dsp.getBid(auction.User.Id, auction.Imp.Bidfloor)
 			if err == nil {
 				dsp.registerBid(*bid)
-				responseBody := AuctionResponseData{auction.Id, bid.Id, *bid}
+				responseBody := BidData{auction.Id, bid.Id, *bid}
 				json.NewEncoder(w).Encode(responseBody)
 				w.WriteHeader(http.StatusOK)
 				return
@@ -44,6 +44,29 @@ func main() {
 				return
 			}
 		}
+
+		if r.Method == http.MethodPut {
+			bidData := BidData{}
+			if err := json.NewDecoder(r.Body).Decode(&bidData); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			bid, ok := dsp.Bids[bidData.Id]
+			if ok {
+				err := dsp.spend(bid.Price)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusPreconditionFailed)
+					return
+				}
+				dsp.registerImpression(bid)
+				w.WriteHeader(http.StatusOK)
+				return
+			} else {
+				http.Error(w, "Bid not found", http.StatusNotFound)
+				return
+			}
+		}
+
 		w.WriteHeader(http.StatusNotImplemented)
 		return
 	})
@@ -51,7 +74,6 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-// JSON Structs
 type AuctionData struct {
 	Id     string       `json:"id"`
 	Imp    BidfloorData `json:"imp"`
@@ -71,7 +93,7 @@ type UserData struct {
 	Id string `json:"id"`
 }
 
-type AuctionResponseData struct {
+type BidData struct {
 	Id    string `json:"id"`
 	BidId string `json:"bidid"`
 	Bid   Bid    `json:"bid"`
