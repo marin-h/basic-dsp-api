@@ -32,33 +32,33 @@ paths:
 definitions:
   postPayload:
     type: object
-    required: true            
+    required: 
+      - id           
+      - imp
+      - user 
     properties:
       id:
         type: string
-        required: true
         example: "3cb627bf"
       imp:
         type: object
-        required: true
+        required:
+          - bidfloor
         properties:
           bidfloor: 
             type: number
-            required: true
             example: 0.5
       device:
         type: object
-        required: true                
         properties:
           ip: 
             type: string
-            required: true
             example: "100.123.230.3"
       user:
         type: object
-        required: true
+        required: 
+          - id
         properties:
           id:
             type: string
-            required: true
             example: "f345nf0k"
