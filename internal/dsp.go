@@ -51,6 +51,8 @@ func (dsp *DSP) setup(dailyBudget float64, limitPerMinute int8, limitPer3Minute 
 	dsp.Budget = dailyBudget
 	dsp.MaxImpressionsPer3Minutes = limitPer3Minute
 	dsp.MaxImpressionsPerMinute = limitPerMinute
+	dsp.Bids = make(map[string]Bid)
+	dsp.Registry = make(map[string]ImpressionRegistry)
 }
 
 func (dsp *DSP) frequencyCapped(userId string, now time.Time) bool {
@@ -61,24 +63,33 @@ func (dsp *DSP) frequencyCapped(userId string, now time.Time) bool {
 	timeStampAMinuteAgo := now.Add(-1 * time.Minute).Unix()
 	timeStamp3MinuteAgo := now.Add(-3 * time.Minute).Unix()
 
-	currentImpression := dsp.Registry[userId].end
+	userRegistry, ok := dsp.Registry[userId]
 
-	for currentImpression.timestamp >= timeStamp3MinuteAgo {
+	if ok {
 
-		if currentImpression.timestamp >= timeStamp3MinuteAgo {
-			count3MinutesImpressions += 1
-			if count3MinutesImpressions == dsp.MaxImpressionsPer3Minutes {
-				return true
-			}
+		currentImpression := userRegistry.end
 
-			if currentImpression.timestamp >= timeStampAMinuteAgo {
-				count1MinuteImpressions += 1
-				if count1MinuteImpressions == dsp.MaxImpressionsPerMinute {
+		for currentImpression.timestamp >= timeStamp3MinuteAgo {
+
+			if currentImpression.timestamp >= timeStamp3MinuteAgo {
+				count3MinutesImpressions += 1
+				if count3MinutesImpressions == dsp.MaxImpressionsPer3Minutes {
 					return true
 				}
+
+				if currentImpression.timestamp >= timeStampAMinuteAgo {
+					count1MinuteImpressions += 1
+					if count1MinuteImpressions == dsp.MaxImpressionsPerMinute {
+						return true
+					}
+				}
 			}
+			currentImpression = currentImpression.previous
 		}
-		currentImpression = currentImpression.previous
 	}
 	return false
+}
+
+func (dsp *DSP) registerBid(bid Bid) {
+	dsp.Bids[bid.Id] = bid
 }

@@ -34,6 +34,7 @@ func main() {
 
 			err, bid := dsp.getBid(auction.User.Id, auction.Imp.Bidfloor)
 			if err == nil {
+				dsp.registerBid(*bid)
 				responseBody := AuctionResponseData{auction.Id, bid.Id, *bid}
 				json.NewEncoder(w).Encode(responseBody)
 				w.WriteHeader(http.StatusOK)
