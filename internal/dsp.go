@@ -30,7 +30,7 @@ func (dsp *DSP) getBid(userId string, bidFloor float64) (error, *Bid) {
 
 	bid := &Bid{}
 
-	price := rand.Float64()
+	price := bidFloor + rand.Float64()
 	if dsp.notEnough(price) {
 		return errors.New("Out of budget"), bid
 	}

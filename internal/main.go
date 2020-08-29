@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
 )
 
 func main() {
@@ -13,6 +15,8 @@ func main() {
 	dsp.setup(10, 5, 10)
 	fmt.Println("DSP setup")
 	fmt.Printf("%+v\n", dsp)
+
+	rand.Seed(time.Now().UnixNano())
 
 	fs := http.FileServer(http.Dir("../doc"))
 	http.Handle("/doc/", http.StripPrefix("/doc/", fs))
