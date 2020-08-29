@@ -51,8 +51,7 @@ func main() {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			bid, ok := dsp.Bids[bidData.Id]
-			if ok {
+			if bid, ok := dsp.Bids[bidData.BidId]; ok {
 				err := dsp.spend(bid.Price)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusPreconditionFailed)
