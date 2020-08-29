@@ -9,6 +9,10 @@ import (
 
 func main() {
 
+	dsp := DSP{}
+	dsp.setup(10, 5, 10)
+	fmt.Println("DSP setup", dsp)
+
 	fs := http.FileServer(http.Dir("./doc"))
 	http.Handle("/doc/", http.StripPrefix("/doc/", fs))
 
@@ -22,6 +26,20 @@ func main() {
 			}
 			fmt.Println("Bid posted")
 			fmt.Printf("%+v\n", auction)
+			if err := json.NewDecoder(r.Body).Decode(&auction); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			err, bid := dsp.getBid(auction.user.id, auction.imp.bidFloor)
+			if err != nil {
+				responseBody := AuctionResponse{auction.id, bid.id, *bid}
+				json.NewEncoder(w).Encode(responseBody)
+				w.WriteHeader(http.StatusOK)
+				return
+			} else {
+				http.Error(w, err.Error(), http.StatusNoContent)
+				return
+			}
 			w.WriteHeader(http.StatusOK)
 			return
 		}
@@ -50,4 +68,10 @@ type BidfloorData struct {
 
 type UserData struct {
 	Id string `json:"id"`
+}
+
+type AuctionResponseData struct {
+	Id    string `json:"id"`
+	BidId string `json:"bidid"`
+	Bid   Bid    `json:"bid"`
 }
