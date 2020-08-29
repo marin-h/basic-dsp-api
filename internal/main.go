@@ -11,9 +11,10 @@ func main() {
 
 	dsp := DSP{}
 	dsp.setup(10, 5, 10)
-	fmt.Println("DSP setup", dsp)
+	fmt.Println("DSP setup")
+	fmt.Printf("%+v\n", dsp)
 
-	fs := http.FileServer(http.Dir("./doc"))
+	fs := http.FileServer(http.Dir("../doc"))
 	http.Handle("/doc/", http.StripPrefix("/doc/", fs))
 
 	http.HandleFunc("/bid", func(w http.ResponseWriter, r *http.Request) {
@@ -26,13 +27,10 @@ func main() {
 			}
 			fmt.Println("Bid posted")
 			fmt.Printf("%+v\n", auction)
-			if err := json.NewDecoder(r.Body).Decode(&auction); err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
+
 			err, bid := dsp.getBid(auction.User.Id, auction.Imp.Bidfloor)
 			if err == nil {
-				responseBody := AuctionResponseData{auction.Id, bid.id, *bid}
+				responseBody := AuctionResponseData{auction.Id, bid.Id, *bid}
 				json.NewEncoder(w).Encode(responseBody)
 				w.WriteHeader(http.StatusOK)
 				return
