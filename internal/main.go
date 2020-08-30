@@ -6,7 +6,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -30,13 +29,13 @@ func main() {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			fmt.Println("Bid posted")
+			fmt.Println("Auction request received")
 			fmt.Printf("%+v\n", auction)
 
 			err, bid := dsp.getBid(auction.User.Id, auction.Imp.Bidfloor)
 			if err == nil {
 				dsp.registerBid(*bid)
-				responseBody := BidData{auction.Id, bid.Id, *bid}
+				responseBody := BidData{auction.Id, bid.Id, ImpressionData{Price: bid.Price, Nurl: "/winningnotice?bidid=" + bid.Id}}
 				json.NewEncoder(w).Encode(responseBody)
 				w.WriteHeader(http.StatusOK)
 				return
@@ -50,23 +49,37 @@ func main() {
 		return
 	})
 
-	http.HandleFunc("/bid/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/winningnotice", func(w http.ResponseWriter, r *http.Request) {
 
-		if r.Method == http.MethodPut {
+		if r.Method == http.MethodPost {
 
-			id := strings.Split(r.URL.Path, "/")[2]
+			id := r.URL.Query().Get("bidid")
+
 			if id == "" {
-				http.Error(w, "Must provide bid id", http.StatusBadRequest)
+				http.Error(w, "Request malformed", http.StatusBadRequest)
 				return
 			}
 
 			if bid, ok := dsp.Bids[id]; ok {
-				err := dsp.spend(bid.Price)
+
+				impressionData := ImpressionData{}
+				if err := json.NewDecoder(r.Body).Decode(&impressionData); err != nil {
+					http.Error(w, err.Error(), http.StatusBadRequest)
+					return
+				}
+
+				fmt.Println("Win notice received")
+				fmt.Printf("%+v\n", impressionData)
+
+				err := dsp.spend(impressionData.Price)
+
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusPreconditionFailed)
 					return
 				}
 				dsp.registerImpression(bid)
+				dsp.updateBid(bid.Id, impressionData.Price, impressionData.Timestamp)
+
 				w.WriteHeader(http.StatusOK)
 				return
 			} else {
@@ -102,7 +115,13 @@ type UserData struct {
 }
 
 type BidData struct {
-	Id    string `json:"id"`
-	BidId string `json:"bidid"`
-	Bid   Bid    `json:"bid"`
+	Id    string         `json:"id"`
+	BidId string         `json:"bidid"`
+	Imp   ImpressionData `json:"bid"`
+}
+
+type ImpressionData struct {
+	Price     float64 `json:"price,omitempty"`
+	Timestamp int64   `json:"timestamp,omitempty"`
+	Nurl      string  `json:"nurl,omitempty"`
 }
