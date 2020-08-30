@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"errors"
@@ -48,6 +48,7 @@ func (dsp *DSP) getBid(userId string, bidFloor float64) (error, *Bid) {
 }
 
 func (dsp *DSP) setup(dailyBudget float64, limitPerMinute int8, limitPer3Minute int8) {
+	rand.Seed(time.Now().UnixNano())
 	dsp.Budget = dailyBudget
 	dsp.MaxImpressionsPer3Minutes = limitPer3Minute
 	dsp.MaxImpressionsPerMinute = limitPerMinute
@@ -93,7 +94,6 @@ func (dsp *DSP) registerBid(bid Bid) {
 }
 
 func (dsp *DSP) registerImpression(bid Bid) {
-
 	newImpression := Impression{bid.Timestamp, &Impression{}}
 	registry := dsp.Registry[bid.UserId]
 	registry.Append(&newImpression)
