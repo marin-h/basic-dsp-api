@@ -28,18 +28,22 @@ paths:
           description: Bid created
         '204':
           description: Bid not created
-  /bid/{id}:
-    put:
+  /winningnotice?bidid={id}:
+    post:
       summary: Update Bid 
       description: Register user's impression and decrease budget spent
       parameters:
         - in: path
           description: The bid to update.
           name: id
+          type: string
+          required: 
+            - id
+        - in: body
+          description: The bid to update.
+          name: payload
           schema: 
-            type: string
-          required:
-            - bidid  
+            "$ref": "#/definitions/impPayload"
       responses:
         '412':
           description: Budget limit
@@ -47,6 +51,16 @@ paths:
           description: Bid not found
 
 definitions:
+  impPayload:
+    type: object
+    required:
+      - timestamp
+      - price 
+    properties:
+      timestamp:
+        type: number
+      price:
+        type: number
   postPayload:
     type: object
     required: 
