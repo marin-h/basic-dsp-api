@@ -6,6 +6,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -45,13 +46,21 @@ func main() {
 			}
 		}
 
+		w.WriteHeader(http.StatusNotImplemented)
+		return
+	})
+
+	http.HandleFunc("/bid/", func(w http.ResponseWriter, r *http.Request) {
+
 		if r.Method == http.MethodPut {
-			bidData := BidData{}
-			if err := json.NewDecoder(r.Body).Decode(&bidData); err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
+
+			id := strings.Split(r.URL.Path, "/")[2]
+			if id == "" {
+				http.Error(w, "Must provide bid id", http.StatusBadRequest)
 				return
 			}
-			if bid, ok := dsp.Bids[bidData.BidId]; ok {
+
+			if bid, ok := dsp.Bids[id]; ok {
 				err := dsp.spend(bid.Price)
 				if err != nil {
 					http.Error(w, err.Error(), http.StatusPreconditionFailed)

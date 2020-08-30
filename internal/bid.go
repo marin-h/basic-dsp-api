@@ -13,7 +13,7 @@ type Bid struct {
 }
 
 func createBid(id string, userId string, price float64, timestamp int64) *Bid {
-	return &Bid{id, userId, timestamp, price, "/impression"}
+	return &Bid{id, userId, timestamp, price, "/bid/" + id}
 }
 
 func getBidId() string {

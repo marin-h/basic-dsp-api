@@ -28,15 +28,18 @@ paths:
           description: Bid created
         '204':
           description: Bid not created
+  /bid/{id}:
     put:
       summary: Update Bid 
       description: Register user's impression and decrease budget spent
       parameters:
-        - in: body
-          description: The bid to create.
-          name: payload
+        - in: path
+          description: The bid to update.
+          name: id
           schema: 
-            "$ref": "#/definitions/putPayload"
+            type: string
+          required:
+            - bidid  
       responses:
         '412':
           description: Budget limit
@@ -76,11 +79,3 @@ definitions:
           id:
             type: string
             example: "f345nf0k"
-  putPayload:
-    type: object
-    required: 
-      - bidid
-    properties:
-      bidid:
-        type: string
-        example: "6db52328-ff16-4485-b67c-2bf0dde36085"
