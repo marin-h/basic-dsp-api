@@ -18,7 +18,7 @@ func (dsp *DSP) notEnough(money float64) bool {
 	return money > dsp.Budget
 }
 
-func (dsp *DSP) spend(money float64) error {
+func (dsp *DSP) Spend(money float64) error {
 	if dsp.notEnough(money) {
 		return errors.New("Budget exceeded")
 	} else {
@@ -27,7 +27,7 @@ func (dsp *DSP) spend(money float64) error {
 	return nil
 }
 
-func (dsp *DSP) getBid(userId string, bidFloor float64) (error, *Bid) {
+func (dsp *DSP) GetBid(userId string, bidFloor float64) (error, *Bid) {
 
 	bid := &Bid{}
 
@@ -47,7 +47,7 @@ func (dsp *DSP) getBid(userId string, bidFloor float64) (error, *Bid) {
 	return nil, bid
 }
 
-func (dsp *DSP) setup(dailyBudget float64, limitPerMinute int8, limitPer3Minute int8) {
+func (dsp *DSP) Setup(dailyBudget float64, limitPerMinute int8, limitPer3Minute int8) {
 	rand.Seed(time.Now().UnixNano())
 	dsp.Budget = dailyBudget
 	dsp.MaxImpressionsPer3Minutes = limitPer3Minute
@@ -89,17 +89,17 @@ func (dsp *DSP) frequencyCapped(userId string, now time.Time) bool {
 	return false
 }
 
-func (dsp *DSP) registerBid(bid Bid) {
+func (dsp *DSP) RegisterBid(bid Bid) {
 	dsp.Bids[bid.Id] = bid
 }
 
-func (dsp *DSP) registerImpression(bid Bid) {
+func (dsp *DSP) RegisterImpression(bid Bid) {
 	newImpression := Impression{bid.Timestamp, &Impression{}}
 	registry := dsp.Registry[bid.UserId]
 	registry.Append(&newImpression)
 }
 
-func (dsp *DSP) updateBid(id string, price float64, timestamp int64) {
+func (dsp *DSP) UpdateBid(id string, price float64, timestamp int64) {
 	bid := dsp.Bids[id]
 	bid.Price = price
 	bid.Timestamp = timestamp
