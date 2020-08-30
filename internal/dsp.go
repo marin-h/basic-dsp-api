@@ -9,7 +9,7 @@ import (
 type DSP struct {
 	Budget                    float64 // Reset to 0 at 00:00 using lambda from aws -> https://docs.aws.amazon.com/lambda/latest/dg/golang-handler.html
 	Registry                  map[string]ImpressionRegistry
-	Bids                      map[string]Bid // Will need to implement some value-cleaning
+	Bids                      map[string]Bid // Clear values based on pending status and timestamp using expiration criteria
 	MaxImpressionsPerMinute   int8
 	MaxImpressionsPer3Minutes int8
 }
@@ -63,9 +63,7 @@ func (dsp *DSP) frequencyCapped(userId string, now time.Time) bool {
 	timeStampAMinuteAgo := now.Add(-1 * time.Minute).Unix()
 	timeStamp3MinuteAgo := now.Add(-3 * time.Minute).Unix()
 
-	userRegistry, ok := dsp.Registry[userId]
-
-	if ok {
+	if userRegistry, ok := dsp.Registry[userId]; ok {
 
 		currentImpression := userRegistry.end
 
@@ -97,11 +95,13 @@ func (dsp *DSP) registerBid(bid Bid) {
 func (dsp *DSP) registerImpression(bid Bid) {
 
 	newImpression := Impression{bid.Timestamp, &Impression{}}
-
-	if _, ok := dsp.Registry[bid.UserId]; !ok {
-		dsp.Registry[bid.UserId] = ImpressionRegistry{}
-	}
-
 	registry := dsp.Registry[bid.UserId]
 	registry.Append(&newImpression)
+}
+
+func (dsp *DSP) updateBid(id string, price float64, timestamp int64) {
+	bid := dsp.Bids[id]
+	bid.Price = price
+	bid.Timestamp = timestamp
+	bid.Status = "won"
 }
