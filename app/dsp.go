@@ -37,7 +37,7 @@ func (dsp *DSP) GetBid(userId string, bidFloor float64) (error, *Bid) {
 	}
 
 	now := time.Now()
-	if dsp.frequencyCapped(userId, now) {
+	if dsp.FrequencyCapped(userId, now) {
 		return errors.New("User frequency is capped"), bid
 	}
 
@@ -50,13 +50,13 @@ func (dsp *DSP) GetBid(userId string, bidFloor float64) (error, *Bid) {
 func (dsp *DSP) Setup(dailyBudget float64, limitPerMinute int8, limitPer3Minute int8) {
 	rand.Seed(time.Now().UnixNano())
 	dsp.Budget = dailyBudget
-	dsp.MaxImpressionsPer3Minutes = limitPer3Minute
 	dsp.MaxImpressionsPerMinute = limitPerMinute
+	dsp.MaxImpressionsPer3Minutes = limitPer3Minute
 	dsp.Bids = make(map[string]Bid)
 	dsp.Registry = make(map[string]ImpressionRegistry)
 }
 
-func (dsp *DSP) frequencyCapped(userId string, now time.Time) bool {
+func (dsp *DSP) FrequencyCapped(userId string, now time.Time) bool {
 
 	var count1MinuteImpressions int8
 	var count3MinutesImpressions int8
@@ -94,9 +94,9 @@ func (dsp *DSP) RegisterBid(bid Bid) {
 }
 
 func (dsp *DSP) RegisterImpression(bid Bid) {
-	newImpression := Impression{bid.Timestamp, &Impression{}}
 	registry := dsp.Registry[bid.UserId]
-	registry.Append(&newImpression)
+	registry.Append(&Impression{bid.Timestamp, &Impression{}})
+	dsp.Registry[bid.UserId] = registry // check pointers..
 }
 
 func (dsp *DSP) UpdateBid(id string, price float64, timestamp int64) {

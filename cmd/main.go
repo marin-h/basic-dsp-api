@@ -6,17 +6,17 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/marin-h/simple-dsp/app"
+	app "github.com/marin-h/simple-dsp/app"
 )
 
-var dsp app.DSP
+var Dsp app.DSP
 
 func init() {
-	// initialize dsp
-	dsp = app.DSP{}
-	dsp.Setup(10, 5, 10)
-	fmt.Println("DSP setup")
-	fmt.Printf("%+v\n", dsp)
+	// initialize Dsp
+	Dsp = app.DSP{}
+	Dsp.Setup(10, 5, 10)
+	fmt.Println("Dsp setup")
+	fmt.Printf("%+v\n", Dsp)
 }
 
 func Run() {
@@ -25,7 +25,7 @@ func Run() {
 	fs := http.FileServer(http.Dir("./doc"))
 	http.Handle("/doc/", http.StripPrefix("/doc/", fs))
 
-	// dsp endpoints
+	// Dsp endpoints
 	http.HandleFunc("/bid", HandleBid)
 	http.HandleFunc("/winningnotice", HandleNotice)
 
@@ -79,9 +79,9 @@ func HandleBid(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Auction request received")
 		fmt.Printf("%+v\n", auction)
 
-		err, bid := dsp.GetBid(auction.User.Id, auction.Imp.Bidfloor)
+		err, bid := Dsp.GetBid(auction.User.Id, auction.Imp.Bidfloor)
 		if err == nil {
-			dsp.RegisterBid(*bid)
+			Dsp.RegisterBid(*bid)
 			responseBody := BidData{auction.Id, bid.Id, ImpressionData{Price: bid.Price, Nurl: r.Host + "/winningnotice?bidid=" + bid.Id}}
 			json.NewEncoder(w).Encode(responseBody)
 			w.WriteHeader(http.StatusOK)
@@ -115,17 +115,18 @@ func HandleNotice(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("Win Notice request received")
 		fmt.Printf("%+v\n", notice)
 
-		if bid, ok := dsp.Bids[id]; ok {
+		if bid, ok := Dsp.Bids[id]; ok {
 
-			err := dsp.Spend(notice.Price)
+			err := Dsp.Spend(notice.Price)
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusPreconditionFailed)
 				fmt.Println("Error:", err.Error())
 				return
 			}
-			dsp.RegisterImpression(bid)
-			dsp.UpdateBid(bid.Id, notice.Price, notice.Timestamp)
+			fmt.Printf("%+v\n", bid)
+			Dsp.RegisterImpression(bid)
+			Dsp.UpdateBid(bid.Id, notice.Price, notice.Timestamp)
 
 			w.WriteHeader(http.StatusOK)
 			return

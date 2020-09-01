@@ -1,11 +1,13 @@
-package app
+package test
 
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+	"time"
 
 	cmd "github.com/marin-h/simple-dsp/cmd"
 )
@@ -48,10 +50,10 @@ func TestHandleBid(t *testing.T) {
 
 func TestWinNotice(t *testing.T) {
 
-	var jsonStr = []byte(`{
-			"timestamp": 123456789,
-			"price": 0.5
-		}`)
+	var jsonStr = []byte(fmt.Sprintf(`{
+		"timestamp": %d,
+		"price": 0.5
+	}`, time.Now().Unix()))
 
 	req, err := http.NewRequest("POST", bidData.Imp.Nurl, bytes.NewBuffer(jsonStr))
 	if err != nil {
