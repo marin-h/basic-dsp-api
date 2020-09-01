@@ -19,10 +19,10 @@ paths:
       description: Create a pending bid for a user's auction
       parameters:
         - in: body
-          description: The bid to create.
+          description: Post auction data to create bid.
           name: payload
           schema: 
-            "$ref": "#/definitions/postPayload"
+            "$ref": "#/definitions/Auction"
       responses:
         '200':
           description: Bid created
@@ -30,8 +30,8 @@ paths:
           description: Bid not created
   /winningnotice?bidid={id}:
     post:
-      summary: Update Bid 
-      description: Register user's impression and decrease budget spent
+      summary: Impression Notice  
+      description: Notify on won bid
       parameters:
         - in: path
           description: The bid to update.
@@ -43,7 +43,7 @@ paths:
           description: The bid to update.
           name: payload
           schema: 
-            "$ref": "#/definitions/impPayload"
+            "$ref": "#/definitions/WinNotice"
       responses:
         '412':
           description: Budget limit
@@ -51,7 +51,7 @@ paths:
           description: Bid not found
 
 definitions:
-  impPayload:
+  WinNotice:
     type: object
     required:
       - timestamp
@@ -59,9 +59,11 @@ definitions:
     properties:
       timestamp:
         type: number
+        example: 28376382
       price:
         type: number
-  postPayload:
+        example: 0.5
+  Auction:
     type: object
     required: 
       - id           
