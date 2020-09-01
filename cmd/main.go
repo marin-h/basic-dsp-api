@@ -1,4 +1,4 @@
-package main
+package cmd
 
 import (
 	"encoding/json"
@@ -6,18 +6,20 @@ import (
 	"log"
 	"net/http"
 
-	app "simple-dsp/internal/app"
+	"github.com/marin-h/simple-dsp/app"
 )
 
 var dsp app.DSP
 
-func main() {
-
+func init() {
 	// initialize dsp
 	dsp = app.DSP{}
 	dsp.Setup(10, 5, 10)
 	fmt.Println("DSP setup")
 	fmt.Printf("%+v\n", dsp)
+}
+
+func Run() {
 
 	// swagger
 	fs := http.FileServer(http.Dir("./doc"))
@@ -57,9 +59,13 @@ type BidData struct {
 }
 
 type ImpressionData struct {
-	Price     float64 `json:"price,omitempty"`
-	Timestamp int64   `json:"timestamp,omitempty"`
-	Nurl      string  `json:"nurl,omitempty"`
+	Price float64 `json:"price,omitempty"`
+	Nurl  string  `json:"nurl,omitempty"`
+}
+
+type WinNotice struct {
+	Timestamp int64   `json:"timestamp"`
+	Price     float64 `json:"price"`
 }
 
 func HandleBid(w http.ResponseWriter, r *http.Request) {
@@ -76,11 +82,12 @@ func HandleBid(w http.ResponseWriter, r *http.Request) {
 		err, bid := dsp.GetBid(auction.User.Id, auction.Imp.Bidfloor)
 		if err == nil {
 			dsp.RegisterBid(*bid)
-			responseBody := BidData{auction.Id, bid.Id, ImpressionData{Price: bid.Price, Nurl: "/winningnotice?bidid=" + bid.Id}}
+			responseBody := BidData{auction.Id, bid.Id, ImpressionData{Price: bid.Price, Nurl: r.Host + "/winningnotice?bidid=" + bid.Id}}
 			json.NewEncoder(w).Encode(responseBody)
 			w.WriteHeader(http.StatusOK)
 			return
 		} else {
+			fmt.Println("Error:", err.Error())
 			http.Error(w, err.Error(), http.StatusNoContent)
 			return
 		}
@@ -95,36 +102,36 @@ func HandleNotice(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
 
 		id := r.URL.Query().Get("bidid")
-
 		if id == "" {
 			http.Error(w, "Request malformed", http.StatusBadRequest)
+		}
+		notice := WinNotice{}
+		if err := json.NewDecoder(r.Body).Decode(&notice); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			fmt.Println("Error:", err.Error())
 			return
 		}
 
+		fmt.Println("Win Notice request received")
+		fmt.Printf("%+v\n", notice)
+
 		if bid, ok := dsp.Bids[id]; ok {
 
-			impressionData := ImpressionData{}
-			if err := json.NewDecoder(r.Body).Decode(&impressionData); err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			fmt.Println("Win notice received")
-			fmt.Printf("%+v\n", impressionData)
-
-			err := dsp.Spend(impressionData.Price)
+			err := dsp.Spend(notice.Price)
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusPreconditionFailed)
+				fmt.Println("Error:", err.Error())
 				return
 			}
 			dsp.RegisterImpression(bid)
-			dsp.UpdateBid(bid.Id, impressionData.Price, impressionData.Timestamp)
+			dsp.UpdateBid(bid.Id, notice.Price, notice.Timestamp)
 
 			w.WriteHeader(http.StatusOK)
 			return
 		} else {
 			http.Error(w, "Bid not found", http.StatusNotFound)
+			fmt.Println("Error: Bid not found")
 			return
 		}
 	}
