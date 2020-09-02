@@ -15,8 +15,6 @@ func init() {
 	// initialize Dsp
 	Dsp = app.DSP{}
 	Dsp.Setup(10, 5, 10)
-	fmt.Println("Dsp setup")
-	fmt.Printf("%+v\n", Dsp)
 }
 
 func Run() {
@@ -76,8 +74,6 @@ func HandleBid(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		fmt.Println("Auction request received")
-		fmt.Printf("%+v\n", auction)
 
 		err, bid := Dsp.GetBid(auction.User.Id, auction.Imp.Bidfloor)
 		if err == nil {
@@ -100,7 +96,6 @@ func HandleBid(w http.ResponseWriter, r *http.Request) {
 func HandleNotice(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
-
 		id := r.URL.Query().Get("bidid")
 		if id == "" {
 			http.Error(w, "Request malformed", http.StatusBadRequest)
@@ -108,13 +103,8 @@ func HandleNotice(w http.ResponseWriter, r *http.Request) {
 		notice := WinNotice{}
 		if err := json.NewDecoder(r.Body).Decode(&notice); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
-			fmt.Println("Error:", err.Error())
 			return
 		}
-
-		fmt.Println("Win Notice request received")
-		fmt.Printf("%+v\n", notice)
-
 		if bid, ok := Dsp.Bids[id]; ok {
 
 			err := Dsp.Spend(notice.Price)
@@ -124,7 +114,6 @@ func HandleNotice(w http.ResponseWriter, r *http.Request) {
 				fmt.Println("Error:", err.Error())
 				return
 			}
-			fmt.Printf("%+v\n", bid)
 			Dsp.RegisterImpression(bid)
 			Dsp.UpdateBid(bid.Id, notice.Price, notice.Timestamp)
 
