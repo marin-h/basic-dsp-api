@@ -107,7 +107,7 @@ func HandleNotice(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		if bid, ok := Dsp.Bids[id]; ok {
+		if bid, ok := Dsp.Bids[id]; ok && bid.Status == "pending" {
 
 			err := Dsp.Spend(notice.Price)
 
