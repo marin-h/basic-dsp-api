@@ -13,18 +13,24 @@ func TestAPIFrequencyCapped(t *testing.T) {
 
 	var i int64
 	for i = 0; i < cmd.Dsp.MaxImpressionsPerMinute-1; i++ {
+		now := time.Now()
+		if cmd.Dsp.FrequencyCapped("a", now) {
+			t.Errorf("User should not be capped at the moment!")
+		} else {
+			t.Logf("User is not capped at %s", now)
+		}
 		TestHandleBid(t)
 		TestWinNotice(t)
 	}
 
-	fmt.Printf("Total impressions %d", cmd.Dsp.Registry["f345nf0k"].Length)
+	fmt.Printf("Total impressions %d", cmd.Dsp.Registry["a"].Length)
 
-	if !cmd.Dsp.FrequencyCapped("f345nf0k", time.Now()) {
+	if !cmd.Dsp.FrequencyCapped("a", time.Now()) {
 		t.Errorf("User should by capped by now!")
 	}
 }
 
-func TestGranularFrequencyCapping(t *testing.T) {
+func TestTimestampsFrequencyCapping(t *testing.T) {
 
 	var i int64
 	now := time.Now()
