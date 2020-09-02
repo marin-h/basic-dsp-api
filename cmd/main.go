@@ -69,6 +69,7 @@ type WinNotice struct {
 func HandleBid(w http.ResponseWriter, r *http.Request) {
 
 	if r.Method == http.MethodPost {
+
 		auction := AuctionData{}
 		if err := json.NewDecoder(r.Body).Decode(&auction); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -80,6 +81,7 @@ func HandleBid(w http.ResponseWriter, r *http.Request) {
 			Dsp.RegisterBid(*bid)
 			responseBody := BidData{auction.Id, bid.Id, ImpressionData{Price: bid.Price, Nurl: r.Host + "/winningnotice?bidid=" + bid.Id}}
 			json.NewEncoder(w).Encode(responseBody)
+			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			return
 		} else {
@@ -111,17 +113,15 @@ func HandleNotice(w http.ResponseWriter, r *http.Request) {
 
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusPreconditionFailed)
-				fmt.Println("Error:", err.Error())
 				return
 			}
 			Dsp.RegisterImpression(bid)
 			Dsp.UpdateBid(bid.Id, notice.Price, notice.Timestamp)
-
+			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			return
 		} else {
 			http.Error(w, "Bid not found", http.StatusNotFound)
-			fmt.Println("Error: Bid not found")
 			return
 		}
 	}
