@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -22,8 +21,6 @@ func TestAPIFrequencyCapped(t *testing.T) {
 		TestHandleBid(t)
 		TestWinNotice(t)
 	}
-
-	fmt.Printf("Total impressions %d", cmd.Dsp.Registry["a"].Length)
 
 	if !cmd.Dsp.FrequencyCapped("a", time.Now()) {
 		t.Errorf("User should by capped by now!")
