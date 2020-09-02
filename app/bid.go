@@ -1,9 +1,5 @@
 package app
 
-import (
-	"github.com/google/uuid"
-)
-
 type Bid struct {
 	Id        string  `json:"-"`
 	UserId    string  `json:"-"`
@@ -12,10 +8,6 @@ type Bid struct {
 	Price     float64 `json:"price"`
 }
 
-func createBid(id string, userId string, price float64, timestamp int64) *Bid {
+func CreateBid(id string, userId string, price float64, timestamp int64) *Bid {
 	return &Bid{id, userId, timestamp, "pending", price}
-}
-
-func UUID() string {
-	return uuid.New().String()
 }

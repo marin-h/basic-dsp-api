@@ -42,7 +42,7 @@ func (dsp *DSP) GetBid(userId string, bidFloor float64) (error, *Bid) {
 	}
 
 	timestamp := now.Unix()
-	bid = createBid(UUID(), userId, price, timestamp)
+	bid = CreateBid(UUID(), userId, price, timestamp)
 
 	return nil, bid
 }
@@ -89,13 +89,17 @@ func (dsp *DSP) FrequencyCapped(userId string, now time.Time) bool {
 }
 
 func (dsp *DSP) RegisterBid(bid Bid) {
+	Mutex.Lock()
 	dsp.Bids[bid.Id] = bid
+	Mutex.Unlock()
 }
 
 func (dsp *DSP) RegisterImpression(bid Bid) {
+	Mutex.Lock()
 	registry := dsp.Registry[bid.UserId]
 	registry.Append(&Impression{bid.Timestamp, &Impression{}})
 	dsp.Registry[bid.UserId] = registry // check pointers..
+	Mutex.Unlock()
 }
 
 func (dsp *DSP) UpdateBid(id string, price float64, timestamp int64) {
