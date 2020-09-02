@@ -7,8 +7,8 @@ swagger.doc:
 start:
 	go run .
 
-benchmark:
+benchmarks:
 	go test ./benchmark/ -bench=. -v
 
-test:
+tests:
 	go test ./test/ -v
