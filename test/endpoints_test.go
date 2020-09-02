@@ -50,10 +50,19 @@ func TestHandleBid(t *testing.T) {
 
 func TestWinNotice(t *testing.T) {
 
+	PostWinNotice(t, 0)
+}
+
+func PostWinNotice(t *testing.T, timestamp int64) {
+
+	if timestamp == 0 {
+		timestamp = time.Now().Unix()
+	}
+
 	var jsonStr = []byte(fmt.Sprintf(`{
 		"timestamp": %d,
 		"price": 0.5
-	}`, time.Now().Unix()))
+	}`, timestamp))
 
 	req, err := http.NewRequest("POST", bidData.Imp.Nurl, bytes.NewBuffer(jsonStr))
 	if err != nil {
