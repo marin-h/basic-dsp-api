@@ -1,7 +1,7 @@
 package app
 
 type ImpressionRegistry struct {
-	length int
+	Length int64
 	start  *Impression
 	end    *Impression
 }
@@ -12,7 +12,7 @@ type Impression struct {
 }
 
 func (f *ImpressionRegistry) Append(newImpression *Impression) {
-	if f.length == 0 {
+	if f.Length == 0 {
 		f.start = newImpression
 		f.end = newImpression
 	} else {
@@ -20,5 +20,5 @@ func (f *ImpressionRegistry) Append(newImpression *Impression) {
 		newImpression.previous = lastImpression
 		f.end = newImpression
 	}
-	f.length++
+	f.Length++
 }
