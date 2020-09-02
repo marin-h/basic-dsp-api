@@ -15,11 +15,11 @@ Browsing `localhost:8080/doc`
 
 ### Run tests
 ```bash
-$ make test
+$ make tests
 ```
 
 ### Run benchmarks
 ```bash
-$ make benchmark
+$ make benchmarks
 ```
 
