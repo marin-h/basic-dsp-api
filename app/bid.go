@@ -16,6 +16,6 @@ func createBid(id string, userId string, price float64, timestamp int64) *Bid {
 	return &Bid{id, userId, timestamp, "pending", price}
 }
 
-func getBidId() string {
+func UUID() string {
 	return uuid.New().String()
 }
