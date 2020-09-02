@@ -7,9 +7,19 @@ $ make swagger.doc
 
 ### Run the server
 ```bash
-$ go run ./internal
+$ make start
 ```
 
 ### Access docs 
 Browsing `localhost:8080/doc`
+
+### Run tests
+```bash
+$ make test
+```
+
+### Run benchmarks
+```bash
+$ make benchmark
+```
 
