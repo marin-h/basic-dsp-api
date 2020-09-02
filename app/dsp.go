@@ -10,8 +10,8 @@ type DSP struct {
 	Budget                    float64 // Reset to 0 at 00:00 using lambda from aws -> https://docs.aws.amazon.com/lambda/latest/dg/golang-handler.html
 	Registry                  map[string]ImpressionRegistry
 	Bids                      map[string]Bid // Clear values based on pending status and timestamp using expiration criteria
-	MaxImpressionsPerMinute   int8
-	MaxImpressionsPer3Minutes int8
+	MaxImpressionsPerMinute   int64
+	MaxImpressionsPer3Minutes int64
 }
 
 func (dsp *DSP) notEnough(money float64) bool {
@@ -42,12 +42,12 @@ func (dsp *DSP) GetBid(userId string, bidFloor float64) (error, *Bid) {
 	}
 
 	timestamp := now.Unix()
-	bid = createBid(getBidId(), userId, price, timestamp)
+	bid = createBid(UUID(), userId, price, timestamp)
 
 	return nil, bid
 }
 
-func (dsp *DSP) Setup(dailyBudget float64, limitPerMinute int8, limitPer3Minute int8) {
+func (dsp *DSP) Setup(dailyBudget float64, limitPerMinute int64, limitPer3Minute int64) {
 	rand.Seed(time.Now().UnixNano())
 	dsp.Budget = dailyBudget
 	dsp.MaxImpressionsPerMinute = limitPerMinute
@@ -58,9 +58,8 @@ func (dsp *DSP) Setup(dailyBudget float64, limitPerMinute int8, limitPer3Minute 
 
 func (dsp *DSP) FrequencyCapped(userId string, now time.Time) bool {
 
-	var count1MinuteImpressions int8
-	var count3MinutesImpressions int8
-
+	var count1MinuteImpressions int64
+	var count3MinutesImpressions int64
 	timeStampAMinuteAgo := now.Add(-1 * time.Minute).Unix()
 	timeStamp3MinuteAgo := now.Add(-3 * time.Minute).Unix()
 
@@ -100,6 +99,7 @@ func (dsp *DSP) RegisterImpression(bid Bid) {
 }
 
 func (dsp *DSP) UpdateBid(id string, price float64, timestamp int64) {
+	// todo: check bid id
 	bid := dsp.Bids[id]
 	bid.Price = price
 	bid.Timestamp = timestamp
