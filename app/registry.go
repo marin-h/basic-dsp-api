@@ -7,8 +7,8 @@ type ImpressionRegistry struct {
 }
 
 type Impression struct {
-	timestamp int64       // Unix timestamp
-	previous  *Impression // link to the previous Impression
+	timestamp int64
+	previous  *Impression
 }
 
 func (f *ImpressionRegistry) Append(newImpression *Impression) {

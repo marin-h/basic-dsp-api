@@ -103,7 +103,6 @@ func (dsp *DSP) RegisterImpression(bid Bid) {
 }
 
 func (dsp *DSP) UpdateBid(id string, price float64, timestamp int64) {
-	// todo: check bid id
 	bid := dsp.Bids[id]
 	bid.Price = price
 	bid.Timestamp = timestamp
