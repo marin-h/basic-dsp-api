@@ -1,4 +1,5 @@
-# A simple DSP implementation written in Golang
+# my first DSP implementation
+
 
 ### Build swagger doc
 ```bash
